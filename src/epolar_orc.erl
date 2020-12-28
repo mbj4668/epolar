@@ -1,10 +1,10 @@
--module(polar_orc).
+-module(epolar_orc).
 -export([read_sylk/1]).
 
--include_lib("epolar/include/polar.hrl").
+-include_lib("epolar/include/epolar.hrl").
 
 -spec read_sylk(FName :: string()) ->
-        {ok, #{Sail :: binary() => polar:polar()}}
+        {ok, #{Sail :: binary() => epolar:polar()}}
       | {error, term()}.
 %% Read a ORC SYLK (.slk) file and return a map of polars,
 %% one for each "Sail" configuration in the input file.
@@ -137,7 +137,7 @@ patch_polar(P) ->
 
 interpolate_ptable([{TWA0, Optimal, PRow0} | T0],
                    [{TWA1, Optimal, PRow1} | T1]) ->
-    [{avg(TWA0, TWA1), Optimal, polar:interpolate_prow(PRow0, PRow1, 0.5)} |
+    [{avg(TWA0, TWA1), Optimal, epolar:interpolate_prow(PRow0, PRow1, 0.5)} |
      interpolate_ptable(T0, T1)];
 interpolate_ptable([], []) ->
     [].

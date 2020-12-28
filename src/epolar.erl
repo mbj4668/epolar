@@ -1,4 +1,4 @@
--module(polar).
+-module(epolar).
 
 %%% Library functions for polar tables.
 
@@ -9,7 +9,7 @@
 
 -export_type([speed/0, angle/0, ratio/0, polar/0, ptable/0]).
 
--include_lib("epolar/include/polar.hrl").
+-include_lib("epolar/include/epolar.hrl").
 
 -type speed() :: integer(). % knots, resolution 0.01
 -type angle() :: integer(). % degrees, resolution 0.1 (0-1800)
