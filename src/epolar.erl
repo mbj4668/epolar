@@ -88,10 +88,10 @@ get_optimal_run_from_true_wind(TWS, P) ->
     get_optimal_from_true_wind(TWS, run, P).
 
 get_optimal_from_true_wind(TWS, Optimal, P) ->
-    if TWS < 600 ->
+    if TWS < 600 -> % less than 3 m/s, do 3 m/s
             {ok, Res} = get_optimal_from_true_wind(600, Optimal, P),
             {min_tws, Res};
-       TWS > 2000 ->
+       TWS > 2000 -> % more than 10 m/s, do 10 m/s
             {ok, Res} = get_optimal_from_true_wind(2000, Optimal, P),
             {max_tws, Res};
        TWS rem 200 == 0 ->
