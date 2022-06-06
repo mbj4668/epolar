@@ -12,8 +12,8 @@
          vmg/3]).
 -export([rad_abs_to_rel/1, rad_rel_to_abs/1]).
 
--type knots() :: number().
--type rad() :: number().
+-type knots() :: number(). % resolution 1
+-type rad() :: number().   % resolution 1
 
 -type angle_rad_rel() :: angle(rad). % -?PI - ?PI
 -type angle_rad_abs() :: angle(rad). % 0 - 2*?PI
@@ -26,11 +26,18 @@
 -define(MS_TO_KNOTS, (3600/1852)).
 -define(KNOTS_TO_MS, (1852/3600)).
 
--spec correct_awa_from_alignment_offset(AWA :: angle(T),
-                                        Offset :: angle(T)) ->
-          AWA :: angle(T).
+-spec correct_awa_from_alignment_offset(AWA :: angle_rad_abs(),
+                                        Offset :: angle(rad)) ->
+          AWA :: angle_rad_abs().
 correct_awa_from_alignment_offset(AWA, Offset) ->
-    AWA + Offset.
+    CAWA = AWA + Offset,
+    if CAWA > ?PI ->
+            CAWA - (2 * ?PI);
+       CAWA < -?PI ->
+            CAWA + (2 * ?PI);
+       true ->
+            CAWA
+    end.
 
 -spec correct_awa_from_heel(AWA :: angle_rad_rel(),
                             Heel :: angle_rad_rel()) ->
@@ -59,6 +66,8 @@ correct_heading_from_variation(HDG, Variation) ->
              BoatSpeed :: knots(),
              Heel :: angle(T)) ->
           angle(T).
+%% Heel and Leeway are positive when the mast leans to starboard (port
+%% tack) and negative when the mast leans to port (starboard tack).
 leeway(K, BoatSpeed, Heel) ->
     if BoatSpeed < 1 ->
             0;
@@ -73,15 +82,15 @@ speed_through_water(Leeway, BSP) ->
     STW = BSP / math:cos(Leeway),
     STW.
 
--spec true_wind(AWA :: rad(),
+-spec true_wind(AWA :: angle_rad_rel(),
                 AWS :: speed(T),
                 BoatSpeed :: speed(T),
                 Leeway :: rad(),
                 Heading :: rad()) ->
-          {TWA :: rad(), TWS :: speed(T), TWD :: rad()}.
+          {TWA :: angle_rad_rel(), TWS :: speed(T), TWD :: rad()}.
 %% Calculate true wind angle, speed and direction (TWA, TWS, TWD).
 %% If Heading is not known, set it to 0.  TWD will not be correct.
-%% AWA and TWA are relative to boat axis, negative on BB.
+%% AWA and TWA are relative to boat axis, negative on port.
 true_wind(AWA, AWS, BoatSpeed, Leeway, HDG) ->
     CAWA = 3*?PI/2 - AWA,
     %% Calculate component of boat speed perpendicular to boat axis
