@@ -15,6 +15,7 @@
 -type knots() :: number(). % resolution 1
 -type rad() :: number().   % resolution 1
 
+%% relative to boat axis, port is negative
 -type angle_rad_rel() :: angle(rad). % -?PI - ?PI
 -type angle_rad_abs() :: angle(rad). % 0 - 2*?PI
 -type angle(_UR) :: number(). % any unit, any resolution.

@@ -29,9 +29,10 @@ read_sylk(FName) ->
             Error
     end.
 
-%% We expect lines on the form: C;Yn;Xm;Kval
+%% Each line is one cell, on the form: C;Yn;Xm;Kval
 %% where n,m are integers (column, row), and val is
 %% a double qouted string, an integer or a float.
+%% Ret: {Y, X, K} | 'end' | 'eof'
 parse_line(Line) ->
     case binary:split(Line, <<";">>, [global]) of
         [<<"C">>, <<"Y", Y/binary>>, <<"X",X/binary>>, <<"K",K/binary>>] ->
@@ -59,29 +60,43 @@ parse_k(K) ->
             end
     end.
 
-get_row([{Y, 1, Val} | Lines]) ->
-    get_row(Lines, Y, 2, [Val]);
-get_row(['end']) ->
+get_row([{Y, 1, Val} | Lines], v1) ->
+    get_raw_row(Lines, Y, 2, [Val]);
+get_row([{Y, 1, Val}, {_, 2, _} | Lines], v2023) ->
+    %% skip (new in 2023 format) column 2 (Id of sail)
+    get_raw_row(Lines, Y, 3, [Val]);
+get_row(['end'], _) ->
     {'end', []}.
 
-get_row([{Y, X, Val} | T], Y, X, Acc) ->
-    get_row(T, Y, X+1, [Val | Acc]);
-get_row(Lines, _, _, Acc) ->
+%% ensure the first column (X value) is 1
+get_raw_row([{Y, 1, Val} | Lines]) ->
+    get_raw_row(Lines, Y, 2, [Val]);
+get_raw_row(['end']) ->
+    {'end', []}.
+
+%% [the match on X is an assertion
+get_raw_row([{Y, X, Val} | T], Y, X, Acc) ->
+    get_raw_row(T, Y, X+1, [Val | Acc]);
+get_raw_row(Lines, _, _, Acc) ->
     {lists:reverse(Acc), Lines}.
 
 sylk_header(Lines0) ->
-    {Header, Lines1} = get_row(Lines0),
+    {Header, Lines1} = get_raw_row(Lines0),
     case Header of
+        [<<"Sail">>, <<"Id">>, <<"TWS">>, <<"Condition">>, <<"TWA">>, <<"BTV">>,
+         <<"VMG">>, <<"AWS">>, <<"AWA">>, <<"Heel">>, <<"Reef">>, <<"Flat">>] ->
+            %% 2023 format
+            sylk_rows(Lines1, #{}, v2023);
         [<<"Sail">>, <<"TWS">>, <<"Condition">>, <<"TWA">>, <<"BTV">>,
          <<"VMG">>, <<"AWS">>, <<"AWA">>, <<"Heel">>, <<"Reef">>, <<"Flat">>] ->
             %% the format we understand!
-            sylk_rows(Lines1, #{});
+            sylk_rows(Lines1, #{}, v1);
         _ ->
-            {error, unknown_header}
+            {error, {unknown_header, Header}}
     end.
 
-sylk_rows(Lines0, M) ->
-    case get_row(Lines0) of
+sylk_rows(Lines0, M, Vsn) ->
+    case get_row(Lines0, Vsn) of
         {[Sail, TWS, Condition, TWA, BSP, VMG, AWS, AWA, Heel, Reef, Flat],
          Lines1} ->
             Polar1 =
@@ -105,7 +120,7 @@ sylk_rows(Lines0, M) ->
                 end,
             PTable1 = lists:keymerge(1, [{angle(TWA), Optimal, PRow}], PTable0),
             Polar2 = setelement(Idx, Polar1, PTable1),
-            sylk_rows(Lines1, M#{Sail => Polar2});
+            sylk_rows(Lines1, M#{Sail => Polar2}, Vsn);
         {'end', []} ->
             {ok, patch_polars(M)}
     end.
