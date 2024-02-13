@@ -1,7 +1,6 @@
-PROJECT = epolar
-PROJECT_DESCRIPTION = Erlang library for sailing polars
-PROJECT_VERSION = 0.1.0
+DESCRIPTION = Erlang library for sailing polars
 
-DEPS =
+include erl.mk
 
-include $(if $(ERLANG_MK_FILENAME),$(ERLANG_MK_FILENAME),erlang.mk)
+erl.mk:
+	curl -s -O https://raw.githubusercontent.com/mbj4668/erl.mk/main/$@
