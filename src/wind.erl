@@ -22,9 +22,9 @@
 %% relative to boat axis, port is negative
 
 % -?PI - ?PI
--type angle_rad_rel() :: angle(rad).
+-type angle_rad_rel() :: angle(rad()).
 % 0 - 2*?PI
--type angle_rad_abs() :: angle(rad).
+-type angle_rad_abs() :: angle(rad()).
 % any unit, any resolution.
 -type angle(_UR) :: number().
 % any unit, any resolution.
@@ -38,7 +38,7 @@
 
 -spec correct_awa_from_alignment_offset(
     AWA :: angle_rad_abs(),
-    Offset :: angle(rad)
+    Offset :: angle(rad())
 ) ->
     AWA :: angle_rad_abs().
 correct_awa_from_alignment_offset(AWA, Offset) ->
@@ -76,7 +76,7 @@ correct_awa_from_heel(AWA, Heel) ->
     HDG :: angle(T),
     Variation :: angle(T)
 ) ->
-    HGD :: angle(T).
+    HDG :: angle(T).
 correct_heading_from_variation(HDG, Variation) ->
     HDG + Variation.
 

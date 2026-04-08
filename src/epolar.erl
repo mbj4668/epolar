@@ -47,7 +47,9 @@
     %% too low tws; return the lowest we know
     | {min_tws, #prow{}}
     %% too high tws; return the highest we know
-    | {max_tws, #prow{}}.
+    | {max_tws, #prow{}}
+    %% too high twa; return the highest we know
+    | {max_twa, #prow{}}.
 get_from_true_wind(TWS, TWA, P) ->
     if
         TWS < 600 ->
@@ -145,11 +147,11 @@ get_prow(TWA, [{PTWA, _, PRow1} | _]) when TWA < PTWA ->
         flat = 1
     },
     {min_twa, interpolate_prow(PRow0, PRow1, W)};
-get_prow(TWA, [{PTWA0, _, PRow0}, {PTWA1, _, PRow1} | _]) when
-    TWA =< PTWA1
-->
+get_prow(TWA, [{PTWA0, _, PRow0}, {PTWA1, _, PRow1} | _]) when TWA =< PTWA1 ->
     W = (TWA - PTWA0) / (PTWA1 - PTWA0),
     {ok, interpolate_prow(PRow0, PRow1, W)};
+get_prow(_TWA, [LastPRow]) ->
+    {max_twa, LastPRow};
 get_prow(TWA, [_ | T]) ->
     get_prow(TWA, T).
 

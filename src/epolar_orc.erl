@@ -22,7 +22,12 @@ read_sylk(FName) ->
             case IdLine of
                 % this is the format we know
                 <<"ID;PWXL;N;E">> ->
-                    sylk_header([parse_line(Line) || Line <- Lines]);
+                    try
+                        sylk_header([parse_line(Line) || Line <- Lines])
+                    catch
+                        throw:Error ->
+                            Error
+                    end;
                 _ ->
                     {error, unknown_id}
             end;
@@ -57,7 +62,7 @@ parse_k(K) ->
                 binary_to_float(K)
             catch
                 _:_ ->
-                    {error, {unknown_k, K}}
+                    throw({error, {unknown_k, K}})
             end
     end.
 
