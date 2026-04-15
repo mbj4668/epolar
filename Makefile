@@ -8,7 +8,7 @@ dep_mtab = git https://github.com/mbj4668/mtab.git
 ESCRIPT_FILE = bin/epolar
 ESCRIPT_MODULE = epolar_script
 
-EXCLUDE_ERL_MODULES  = epolar_script
+#EXCLUDE_ERL_MODULES  = epolar_script
 
 include erl.mk
 
