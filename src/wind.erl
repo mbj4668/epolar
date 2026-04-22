@@ -237,10 +237,10 @@ damped_true_wind(TimeMs, AWA, AWS, BSP, HDG, Leeway, S) ->
         end,
     TWA = wrap_rel(TWD - HDG),
     S1 = S#dtw_st{n = Nf, e = Ef, last_t = Last},
-    io:format(
-        "TWAi: ~.2f, TWA: ~.2f  TWDi: ~.2f TWD ~.2f\n",
-        [?r(_TWAi), ?r(TWA), ?r(TWDi), ?r(TWD)]
-    ),
+    %    io:format(
+    %        "TWAi: ~.2f, TWA: ~.2f  TWDi: ~.2f TWD ~.2f\n",
+    %        [?r(_TWAi), ?r(TWA), ?r(TWDi), ?r(TWD)]
+    %    ),
     {TWA, TWS, TWD, S1}.
 
 dtw_lpf(N, E, T, #dtw_st{n = undefined}) ->
